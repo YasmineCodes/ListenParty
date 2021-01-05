@@ -1,7 +1,7 @@
 import React, { Component } from "react"; 
 import { Grid, Button, Typography } from "@material-ui/core"; 
-import createRoomPage from "./CreateRoomPage"; 
 import CreateRoomPage from "./CreateRoomPage";
+import MusicPlayer from "./MusicPlayer"; 
 
 
 export default class Room extends Component { 
@@ -12,7 +12,8 @@ export default class Room extends Component {
             guestCanPause: false,
             isHost: false,
             showSettings: false, 
-            spotifyAuthenticaed: false,
+            spotifyAuthenticated: false,
+            song: {}
         }; 
         this.roomCode = this.props.match.params.roomCode; 
         this.handleLeaveRoom = this.handleLeaveRoom.bind(this); 
@@ -21,7 +22,8 @@ export default class Room extends Component {
         this.renderSettings = this.renderSettings.bind(this); 
         this.getRoomDetails = this.getRoomDetails.bind(this);
         this.authenticateSpotify = this.authenticateSpotify.bind(this); 
-        this.getRoomDetails(); 
+        this.getCurrentSong = this.getCurrentSong.bind(this);
+        this.getRoomDetails();
     }
 
     getRoomDetails() { 
@@ -49,7 +51,7 @@ export default class Room extends Component {
         fetch("/spotify/is-spotify-authenticated/")
             .then((response) => response.json())
             .then((data) => {
-                this.setState({ spotifyAuthenticaed: data.status });
+                this.setState({ spotifyAuthenticated: data.status });
                 if (!data.status) {
                     fetch('/spotify/get-auth-url/')
                         .then((response) => response.json())
@@ -57,6 +59,28 @@ export default class Room extends Component {
                             window.location.replace(data.url);
                         });
                 }
+            }); 
+    }
+    componentDidMount() { 
+        //Calls get current song every 1000 m.seconds (1 sec) while component is mounted
+        this.interval = setInterval(this.getCurrentSong, 1000)
+    }
+    // Stop calls when unmounting 
+    componentWillUnmount() { 
+        clearInterval(this.interval); 
+    }
+    getCurrentSong() { 
+        fetch("/spotify/current-song/")
+            .then((response) => {
+                if (response.status == 204) {
+                    return {}; //TODO: build placeholder for player for when nothing is returned
+                } else {
+                    return response.json();
+                }
+            })
+            .then((data) => {
+                this.setState({song: data }); 
+                console.log(data);
             }); 
     }
 
@@ -110,7 +134,23 @@ export default class Room extends Component {
                         Code: { this.roomCode}
                     </Typography>
                 </Grid>
-                <Grid item xs={12} align="center">
+                <Grid item></Grid>
+                {/* passing music player song object using the spread operator */}
+                <MusicPlayer {...this.state.song}/>
+                {/* show settings button if is host */}
+                {this.state.isHost ? this.renderSettingsButton() : null} 
+                <Grid item xs={12} align="center"> 
+                    <Button variant="contained" color="secondary" onClick={this.handleLeaveRoom}>
+                        Leave Room
+                    </Button>
+                </Grid>
+            </Grid>
+        )
+    }
+
+}
+
+{               /* <Grid item xs={12} align="center">
                     <Typography variant="h6" component="h6">
                        Guest Can Pause: {this.state.guestCanPause.toString()}
                     </Typography>
@@ -124,16 +164,4 @@ export default class Room extends Component {
                     <Typography variant="h6" component="h6">
                         Host: {this.state.isHost.toString()}
                     </Typography>
-                </Grid>
-                {/* show settings button if is host */}
-                {this.state.isHost ? this.renderSettingsButton() : null} 
-                <Grid item xs={12} align="center"> 
-                    <Button variant="contained" color="secondary" onClick={this.handleLeaveRoom}>
-                        Leave Room
-                    </Button>
-                </Grid>
-            </Grid>
-        )
-    }
-
-}
+                </Grid> */}
