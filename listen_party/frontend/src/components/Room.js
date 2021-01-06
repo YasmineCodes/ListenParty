@@ -80,8 +80,24 @@ export default class Room extends Component {
             })
             .then((data) => {
                 this.setState({song: data }); 
-                console.log(data);
+                console.log(data);  
+                if (this.state.song.skip_votes === this.state.song.votes_needed) { 
+                    this.skipSong(); 
+                }
             }); 
+        
+    }
+    skipSong() { 
+        const requestOptions = {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+        }; 
+        fetch("/spotify/skip/", requestOptions)
+        .then((response) => {
+                if (response.status == 403) {
+                    this.setState({ guest_permission: false }); 
+                }
+            });
     }
 
     handleLeaveRoom() {

@@ -88,3 +88,17 @@ def pause_song(host):
 
 def play_song(host):
     return execute_spotify_api_request(host, "player/play", put_=True)
+
+
+def skip_song(session_key):
+    return execute_spotify_api_request(session_key, 'player/next', post_=True)
+
+
+def activate_spotify_device(host, device):
+    print('activating device')
+    headers = {'Content-Type': 'application/json',
+               'Authorization': 'Bearer ' + host.access_token,
+               }
+    response = put('https://api.spotify.com/v1/me/player', headers=headers, data={'device_ids': [device], 'play': True}
+                   ).json()
+    print(response)

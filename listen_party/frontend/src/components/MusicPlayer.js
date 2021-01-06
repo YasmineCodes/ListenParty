@@ -26,10 +26,28 @@ export default class MusicPlayer extends Component {
     }
     playSong() { 
         const requestOptions = {
-            method: "Put",
+            method: "PUT",
             headers: { "Content-Type": "application/json" },
         }; 
-        fetch("/spotify/play/", requestOptions); 
+        fetch("/spotify/play/", requestOptions)
+        .then((response) => {
+                if (response.status == 403) {
+                    this.setState({ guest_permission: false }); 
+                }
+            });
+    }
+
+    skipSong() { 
+        const requestOptions = {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+        }; 
+        fetch("/spotify/skip/", requestOptions)
+        .then((response) => {
+                if (response.status == 403) {
+                    this.setState({ guest_permission: false }); 
+                }
+            });
     }
 
     
@@ -51,8 +69,8 @@ export default class MusicPlayer extends Component {
                         <IconButton onClick={() => {this.props.is_playing ? this.pauseSong() : this.playSong()}}>
                             {this.props.is_playing ? <PauseIcon/> : <PlayArrowIcon/>}
                         </IconButton>
-                        <IconButton>
-                            <SkipNextIcon/>
+                        <IconButton onClick={()=> this.skipSong()}>
+                            <SkipNextIcon /> {" "}{this.props.skip_votes}/{" "}{this.props.votes_needed}
                         </IconButton>
                     </div>
                 </Grid>
