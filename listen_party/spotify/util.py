@@ -96,7 +96,7 @@ def skip_song(session_key):
 
 
 def activate_spotify_device(host, device):
-    print('activating device')
+    print('ACTIVATING DEVICE')
     headers = {'Content-Type': 'application/json',
                'Authorization': 'Bearer ' + host.access_token,
                }

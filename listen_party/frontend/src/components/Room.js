@@ -51,7 +51,6 @@ export default class Room extends Component {
         fetch("/spotify/is-spotify-authenticated/")
             .then((response) => response.json())
             .then((data) => {
-                console.log(`data.access_token: ${data.access_token}`);
                 this.setState({ spotifyAuthenticated: data.status, accessToken: data.access_token });
                 if (!data.status) {
                     fetch('/spotify/get-auth-url/')
@@ -141,11 +140,7 @@ export default class Room extends Component {
     }
 
     render() { 
-        // "BQBDeUdTbYtfSTJAY1VpSdc801bpdzfMlfE3ohu6piANjzbipgLV9jaPpLE1yJiqvjK_kOG9N05lODitL65wRIwrAEqhic3tUITrIh6X-BHeWc8AJkj72DUtDj5cfXPqpBDDErDzmkuWn2XrTZscxlUvwnOP9FQy7UQ8FLo7AaApYYkKKqVPV2pNcg"
-        console.log(`THIS.STATE.ACCESSTOKEN: ${this.state.accessToken}`)
         let uri = this.state.song.uri; 
-        // let accessToken = this.state.accessToken
-        // console.log(`ACCESSTOKEN: ${accessToken}`)
         const accessToken = this.state.accessToken
         if (this.state.showSettings) { 
             return this.renderSettings(); 
