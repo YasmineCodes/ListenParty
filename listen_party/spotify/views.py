@@ -11,7 +11,7 @@ from .models import Vote
 
 class AuthURL(APIView):
     def get(self, request, fornat=None):
-        scopes = 'user-read-playback-state user-modify-playback-state user-read-currently-playing'
+        scopes = 'streaming user-read-email user-read-private user-read-playback-state user-modify-playback-state user-read-currently-playing'
 
         url = Request('GET', 'https://accounts.spotify.com/authorize', params={
             'scope': scopes,
@@ -52,9 +52,11 @@ def spotify_callback(request, format=None):
 
 class IsSpotifyAuthenticated(APIView):
     def get(self, request, format=None):
-        is_authenticated = is_spotify_authenticated(
+        authentication = is_spotify_authenticated(
             request.session.session_key)
-        return Response({'status': is_authenticated}, status=status.HTTP_200_OK)
+        is_authenticated = authentication.get('is_authenticated')
+        access_token = authentication.get('access_token')
+        return Response({'status': is_authenticated, 'access_token': access_token}, status=status.HTTP_200_OK)
 
 
 class CurrentSong(APIView):
@@ -92,6 +94,7 @@ class CurrentSong(APIView):
         song = {
             'title': item.get('name'),
             'artist': artist_string,
+            'uri': item.get('uri'),
             'duration': duration,
             'progress': progress,
             'image_url': album_cover,

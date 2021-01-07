@@ -44,8 +44,9 @@ def is_spotify_authenticated(session_key):
             print("TOKEN EXPIRED, REFRESHING...")
             refresh_spotify_token(session_key)
             print("TOKEN REFRESHED.")
-        return True
-    return False
+        access_token = tokens.access_token
+        return {'is_authenticated': True, 'access_token': access_token}
+    return {'is_authenticated': False, 'access_token': ''}
 
 
 def refresh_spotify_token(session_key):

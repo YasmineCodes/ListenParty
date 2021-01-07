@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { Grid, Button, Typography } from "@material-ui/core"; 
 import CreateRoomPage from "./CreateRoomPage";
 import MusicPlayer from "./MusicPlayer"; 
+import SpotifyPlayer from "react-spotify-web-playback";
 
 
 export default class Room extends Component { 
@@ -13,6 +14,7 @@ export default class Room extends Component {
             isHost: false,
             showSettings: false, 
             spotifyAuthenticated: false,
+            accessToken: '',
             song: {}
         }; 
         this.roomCode = this.props.match.params.roomCode; 
@@ -27,6 +29,7 @@ export default class Room extends Component {
     }
 
     getRoomDetails() { 
+        this.authenticateSpotify(); 
         fetch("/api/get-room/" + "?code=" + this.roomCode)
             .then((response) => {
                 if (!response.ok) {
@@ -41,9 +44,6 @@ export default class Room extends Component {
                     guestCanPause: data.guest_can_pause,
                     isHost: data.is_host,
                 });
-                if (this.state.isHost) { 
-                    this.authenticateSpotify(); 
-                }
             });
     }
     
@@ -51,7 +51,8 @@ export default class Room extends Component {
         fetch("/spotify/is-spotify-authenticated/")
             .then((response) => response.json())
             .then((data) => {
-                this.setState({ spotifyAuthenticated: data.status });
+                console.log(`data.access_token: ${data.access_token}`);
+                this.setState({ spotifyAuthenticated: data.status, accessToken: data.access_token });
                 if (!data.status) {
                     fetch('/spotify/get-auth-url/')
                         .then((response) => response.json())
@@ -63,7 +64,8 @@ export default class Room extends Component {
     }
     componentDidMount() { 
         //Calls get current song every 1000 m.seconds (1 sec) while component is mounted
-        this.interval = setInterval(this.getCurrentSong, 1000)
+        this.getCurrentSong(); 
+        this.interval = setInterval(this.getCurrentSong, 1000); 
     }
     // Stop calls when unmounting 
     componentWillUnmount() { 
@@ -79,8 +81,7 @@ export default class Room extends Component {
                 }
             })
             .then((data) => {
-                this.setState({song: data }); 
-                console.log(data);  
+                this.setState({song: data });   
                 if (this.state.song.skip_votes === this.state.song.votes_needed) { 
                     this.skipSong(); 
                 }
@@ -140,11 +141,23 @@ export default class Room extends Component {
     }
 
     render() { 
+        // "BQBDeUdTbYtfSTJAY1VpSdc801bpdzfMlfE3ohu6piANjzbipgLV9jaPpLE1yJiqvjK_kOG9N05lODitL65wRIwrAEqhic3tUITrIh6X-BHeWc8AJkj72DUtDj5cfXPqpBDDErDzmkuWn2XrTZscxlUvwnOP9FQy7UQ8FLo7AaApYYkKKqVPV2pNcg"
+        console.log(`THIS.STATE.ACCESSTOKEN: ${this.state.accessToken}`)
+        let uri = this.state.song.uri; 
+        // let accessToken = this.state.accessToken
+        // console.log(`ACCESSTOKEN: ${accessToken}`)
+        const accessToken = this.state.accessToken
         if (this.state.showSettings) { 
             return this.renderSettings(); 
         }
         return (
             <Grid container spacing={1}>
+                <div style={{visibility: "hidden"}}>
+                    <SpotifyPlayer
+                        token={accessToken}
+                        syncExternalDevice={true}
+                    />
+                </div>
                 <Grid item xs={12} align="center">
                     <Typography variant="h6" component="h6">
                         Code: { this.roomCode}
