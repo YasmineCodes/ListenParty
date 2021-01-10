@@ -67,14 +67,16 @@ def refresh_spotify_token(session_key):
         session_key, access_token, token_type, expires_in, refresh_token)
 
 
-def execute_spotify_api_request(host, endpoint, post_=False, put_=False):
+def execute_spotify_api_request(host, endpoint, post_=False, put_=False, data={}):
     tokens = get_user_tokens(host)
     headers = {'Content-Type': 'application/json',
                'Authorization': 'Bearer ' + tokens.access_token}
     if post_:
-        post(BASE_URL + endpoint, headers=headers)
+        post(BASE_URL + endpoint, headers=headers, data=data)
     if put_:
-        put(BASE_URL + endpoint, headers=headers)
+        response = put(BASE_URL + endpoint, headers=headers, data=data)
+        print("PUT REQUEST COMPLETED")
+        print(response)
 
     response = get(BASE_URL + endpoint, {}, headers=headers)
     try:
@@ -89,6 +91,11 @@ def pause_song(host):
 
 def play_song(host):
     return execute_spotify_api_request(host, "player/play", put_=True)
+
+
+def sync_guest_player(session_key, data):
+    return execute_spotify_api_request(host=session_key, endpoint="player/play", put_=True, data=data)
+    print('SYNC_GUEST_PLAYER CALLED')
 
 
 def skip_song(session_key):

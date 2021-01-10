@@ -7,6 +7,7 @@ from requests import Request, post
 from .util import *
 from api.models import Room
 from .models import Vote
+import json
 
 
 class AuthURL(APIView):
@@ -104,6 +105,14 @@ class CurrentSong(APIView):
             'id': song_id
         }
         self.update_room_song(room, song_id)
+
+        # If not host, sync player with host
+        if self.request.session.session_key != host:
+            payload = {'uris': [song.get('uri')],
+                       'position_ms': song.get('progress')}
+            sync_guest_player(
+                self.request.session.session_key, data = json.dumps(payload))
+
         # return song object
         return Response(song, status=status.HTTP_200_OK)
 

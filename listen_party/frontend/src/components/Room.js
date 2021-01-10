@@ -3,7 +3,8 @@ import { Grid, Button, Typography } from "@material-ui/core";
 import CreateRoomPage from "./CreateRoomPage";
 import MusicPlayer from "./MusicPlayer"; 
 import SpotifyPlayer from "react-spotify-web-playback";
-
+// import SpotifyPlayer from "./SpotifyPlayer"; 
+// TODO: Create sync_guest_player function in spotify/util that puts to /play endpoint with hosts' current song uri 
 
 export default class Room extends Component { 
     constructor(props) { 
@@ -145,13 +146,18 @@ export default class Room extends Component {
         if (this.state.showSettings) { 
             return this.renderSettings(); 
         }
+        // style={{visibility: "hidden"}}
         return (
             <Grid container spacing={1}>
-                <div style={{visibility: "hidden"}}>
+                <div >
                     <SpotifyPlayer
                         token={accessToken}
-                        syncExternalDevice={true}
+                        uris={[this.state.song.uri]}
+                        // offset={this.state.song.progress}
+                        name="test_player"
                     />
+                    {/* <SpotifyPlayer><p>This is the spotify player.</p></SpotifyPlayer> */}
+                    
                 </div>
                 <Grid item xs={12} align="center">
                     <Typography variant="h6" component="h6">
