@@ -26,6 +26,7 @@ export default class Room extends Component {
         this.getRoomDetails = this.getRoomDetails.bind(this);
         this.authenticateSpotify = this.authenticateSpotify.bind(this); 
         this.getCurrentSong = this.getCurrentSong.bind(this);
+        // this.syncGuest = this.syncGuest.bind(this); 
         this.getRoomDetails();
     }
 
@@ -64,8 +65,13 @@ export default class Room extends Component {
     }
     componentDidMount() { 
         //Calls get current song every 1000 m.seconds (1 sec) while component is mounted
-        this.getCurrentSong(); 
+        clearInterval(this.interval);
         this.interval = setInterval(this.getCurrentSong, 1000); 
+        // if (!this.state.isHost) { 
+        //     this.interval = setInterval(this.syncGuest, 10000); 
+        // } else { 
+        //     this.interval = setInterval(this.getCurrentSong, 1000); 
+        // }
     }
     // Stop calls when unmounting 
     componentWillUnmount() { 
@@ -81,23 +87,41 @@ export default class Room extends Component {
                 }
             })
             .then((data) => {
-                this.setState({song: data });   
-                if (this.state.song.skip_votes === this.state.song.votes_needed) { 
-                    this.skipSong(); 
-                }
+                this.setState({ song: data });  
+                console.log(this.state.song); 
+                // if (this.state.song.skip_votes === this.state.song.votes_needed) { 
+                //     this.skipSong(); 
+                // }
             }); 
         
+        
     }
+
+    syncGuest() { 
+        console.log("sync-guest")
+        const requestOptions = {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+        }; 
+        fetch("/spotify/sync-guest/", requestOptions)
+            .then((response) => {
+                console.log(response);
+                if (response.status == 204) {
+                    console.log("Guest Synced"); 
+                } 
+            }) 
+    }
+
     skipSong() { 
         const requestOptions = {
             method: "POST",
             headers: { "Content-Type": "application/json" },
         }; 
         fetch("/spotify/skip/", requestOptions)
-        .then((response) => {
-                if (response.status == 403) {
-                    this.setState({ guest_permission: false }); 
-                }
+            .then((response) => {
+            if (response.status == 403) {
+                this.setState({ guest_permission: false }); 
+            } 
             });
     }
 
@@ -152,7 +176,10 @@ export default class Room extends Component {
                 <div >
                     <SpotifyPlayer
                         token={accessToken}
-                        uris={[this.state.song.uri]}
+                        // uris={[this.state.song.uri]}
+                        // play={this.state.song.is_playing ? true : false}
+                        syncExternalDevice={true}
+                        // syncExternalDeviceInterval={20}
                         // offset={this.state.song.progress}
                         name="test_player"
                     />

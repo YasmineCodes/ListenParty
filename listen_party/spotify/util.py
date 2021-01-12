@@ -1,9 +1,11 @@
 from requests.api import head
+from rest_framework.response import Response
 from .models import SpotifyToken
 from django.utils import timezone
 from datetime import timedelta
 from .credentials import CLIENT_ID, CLIENT_SECRET
 from requests import post, put, get
+import json
 
 BASE_URL = "https://api.spotify.com/v1/me/"
 
@@ -76,7 +78,7 @@ def execute_spotify_api_request(host, endpoint, post_=False, put_=False, data={}
     if put_:
         response = put(BASE_URL + endpoint, headers=headers, data=data)
         print("PUT REQUEST COMPLETED")
-        print(response)
+        return response
 
     response = get(BASE_URL + endpoint, {}, headers=headers)
     try:
@@ -94,8 +96,18 @@ def play_song(host):
 
 
 def sync_guest_player(session_key, data):
-    return execute_spotify_api_request(host=session_key, endpoint="player/play", put_=True, data=data)
-    print('SYNC_GUEST_PLAYER CALLED')
+    guest_currently_playing = execute_spotify_api_request(
+        session_key, 'player')
+    guest_song_uri = guest_currently_playing.get('item').get('uri')
+    guest_song_progress = guest_currently_playing.get('progress_ms')
+    host_song_uri = data.get('uris')
+    host_song_progress = data.get('progress')
+    print(host_song_uri[0], guest_song_uri)
+    if (guest_song_uri != host_song_uri[0] or
+        (guest_song_uri == host_song_uri and
+         guest_song_progress not in range(host_song_progress-20000, host_song_progress+20000))):
+        return execute_spotify_api_request(host=session_key, endpoint="player/play", put_=True, data=json.dumps(data))
+    return "No need to sync"
 
 
 def skip_song(session_key):

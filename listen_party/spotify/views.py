@@ -9,6 +9,8 @@ from api.models import Room
 from .models import Vote
 import json
 
+CURRENT_SONG = {}
+
 
 class AuthURL(APIView):
     def get(self, request, fornat=None):
@@ -106,12 +108,15 @@ class CurrentSong(APIView):
         }
         self.update_room_song(room, song_id)
 
-        # If not host, sync player with host
+        # update current_song variable
+        CURRENT_SONG['uri'] = song.get('uri')
+        CURRENT_SONG['progress'] = song.get('progress')
         if self.request.session.session_key != host:
-            payload = {'uris': [song.get('uri')],
-                       'position_ms': song.get('progress')}
-            sync_guest_player(
-                self.request.session.session_key, data = json.dumps(payload))
+            payload = {'uris': [CURRENT_SONG.get('uri')],
+                       'position_ms': CURRENT_SONG.get('progress')}
+            sync_response = sync_guest_player(
+                self.request.session.session_key, payload)
+            print(sync_response)
 
         # return song object
         return Response(song, status=status.HTTP_200_OK)
@@ -124,12 +129,40 @@ class CurrentSong(APIView):
             votes = Vote.objects.filter(room=room).delete()
 
 
+class SyncGuest(APIView):
+    def put(self, request, format=None):
+        session_key = self.request.session.session_key
+        room_code = self.request.session.get('room_code')
+        queryset = Room.objects.filter(code=room_code)
+        if queryset.exists():
+            room = queryset[0]
+        else:
+            return Response({'Error': 'Not currently in a room'}, status=status.HTTP_404_NOT_FOUND)
+        host = room.host
+        # If not host, sync player with host
+        if session_key != host:
+            payload = {'uris': [CURRENT_SONG.get('uri')],
+                       'position_ms': CURRENT_SONG.get('progress')}
+            response = sync_guest_player(
+                session_key, data=json.dumps(payload))
+            print(response)
+            if response.status_code == 204:
+                return Response(response, status=status.HTTP_204_NO_CONTENT)
+            else:
+                return Response(response, status=status.HTTP_400_BAD_REQUEST)
+
+
 class PauseSong(APIView):
     def put(self, response, format=None):
         room_code = self.request.session.get('room_code')
         room = Room.objects.filter(code=room_code)[0]
         if self.request.session.session_key == room.host or room.guest_can_pause:
             pause_song(room.host)
+            payload = {'uris': [CURRENT_SONG.get('uri')],
+                       'position_ms': CURRENT_SONG.get('progress')}
+            sync_response = sync_guest_player(
+                self.request.session.session_key, data=json.dumps(payload))
+            print(f"PAUSE SYNC RESPONSE: {sync_response}")
             return Response({}, status=status.HTTP_204_NO_CONTENT)
         return Response({}, status=status.HTTP_403_FORBIDDEN)
 
@@ -140,6 +173,11 @@ class PlaySong(APIView):
         room = Room.objects.filter(code=room_code)[0]
         if self.request.session.session_key == room.host or room.guest_can_pause:
             play_song(room.host)
+            # payload = {'uris': [CURRENT_SONG.get('uri')],
+            #            'position_ms': CURRENT_SONG.get('progress')}
+            # sync_response = sync_guest_player(
+            #     self.request.session.session_key, data=json.dumps(payload))
+            # print(f"PlAY SYNC RESPONSE: {sync_response}")
             return Response({}, status=status.HTTP_204_NO_CONTENT)
         return Response({}, status=status.HTTP_403_FORBIDDEN)
 
@@ -158,6 +196,11 @@ class SkipSong(APIView):
             if self.request.session.session_key == room.host or len(votes)+1 >= votes_needed:
                 votes.delete()
                 skip_song(room.host)
+                # payload = {'uris': [CURRENT_SONG.get('uri')],
+                #            'position_ms': CURRENT_SONG.get('progress')}
+                # sync_response = sync_guest_player(
+                #     self.request.session.session_key, data=json.dumps(payload))
+                # print(f"SKIP SYNC RESPONSE: {sync_response}")
             else:
                 vote = Vote(user=self.request.session.session_key,
                             room=room, song_id=room.current_song)
