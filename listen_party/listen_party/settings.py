@@ -24,9 +24,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'ckrqlwr_i23f**@!wgbtidqd)1p)1i(nnu$sl2jr#96x-r79dc'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', '.herokuapp.com']
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -129,5 +129,4 @@ STATIC_ROOT = os.path.join(PROJECT_DIR, 'static_collected')
 
 STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
 
-STATIC_URL = '/static/'
 STATIC_URL = '/static/'
