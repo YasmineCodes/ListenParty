@@ -1,5 +1,5 @@
 from django.shortcuts import redirect
-from .credentials import REDIRECT_URI, CLIENT_ID, CLIENT_SECRET
+# from .ListenParty/credentials.py import REDIRECT_URI, CLIENT_ID, CLIENT_SECRET
 from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.response import Response
@@ -8,8 +8,14 @@ from .util import *
 from api.models import Room
 from .models import Vote
 import json
+import os
+
 
 CURRENT_SONG = {}
+CLIENT_ID = os.getenv("CLIENT_ID")
+CLIENT_SECRET = os.getenv("CLIENT_SECRET")
+REDIRECT_URI = os.path.join(
+    "listenparty.herokuapp.com", 'spotify', 'redirect')
 
 
 class AuthURL(APIView):
@@ -63,6 +69,10 @@ class IsSpotifyAuthenticated(APIView):
 
 
 class CurrentSong(APIView):
+    print(REDIRECT_URI)
+    print(CLIENT_ID)
+    print(CLIENT_SECRET)
+
     def get(self, request, format=None):
         # get room code
         room_code = self.request.session.get('room_code')

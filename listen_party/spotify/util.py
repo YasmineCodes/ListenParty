@@ -3,11 +3,14 @@ from rest_framework.response import Response
 from .models import SpotifyToken
 from django.utils import timezone
 from datetime import timedelta
-from .credentials import CLIENT_ID, CLIENT_SECRET
 from requests import post, put, get
 from rest_framework import status
 import json
+import os
 
+CLIENT_ID = os.getenv("CLIENT_ID")
+CLIENT_SECRET = os.getenv("CLIENT_SECRET")
+REDIRECT_URI = os.path.join("listenparty.herokuapp.com", 'spotify', 'redirect')
 BASE_URL = "https://api.spotify.com/v1/me/"
 
 

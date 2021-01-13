@@ -87,7 +87,7 @@ export default class Room extends Component {
                 }
             })
             .then((data) => {
-                this.setState({ song: data });  
+                this.setState({ song: data });
                 if (this.state.song.skip_votes === this.state.song.votes_needed) { 
                     this.skipSong(); 
                 }
