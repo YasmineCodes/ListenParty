@@ -1,2 +1,12 @@
 venv/
 credentials.py
+node_modules
+.module-cache
+
+# Django #
+*.log
+*.pot
+*.pyc
+__pycache__
+db.sqlite3
+media
