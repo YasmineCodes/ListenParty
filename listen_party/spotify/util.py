@@ -5,6 +5,7 @@ from django.utils import timezone
 from datetime import timedelta
 from .credentials import CLIENT_ID, CLIENT_SECRET
 from requests import post, put, get
+from rest_framework import status
 import json
 
 BASE_URL = "https://api.spotify.com/v1/me/"
@@ -98,6 +99,8 @@ def play_song(host):
 def sync_guest_player(session_key, data):
     guest_currently_playing = execute_spotify_api_request(
         session_key, 'player')
+    if 'error' in guest_currently_playing or 'item' not in guest_currently_playing:
+        return Response({}, status=status.HTTP_204_NO_CONTENT)
     guest_song_uri = guest_currently_playing.get('item').get('uri')
     guest_song_progress = guest_currently_playing.get('progress_ms')
     host_song_uri = data.get('uris')

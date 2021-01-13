@@ -3,8 +3,12 @@ import { Grid, Button, Typography } from "@material-ui/core";
 import CreateRoomPage from "./CreateRoomPage";
 import MusicPlayer from "./MusicPlayer"; 
 import SpotifyPlayer from "react-spotify-web-playback";
-// import SpotifyPlayer from "./SpotifyPlayer"; 
-// TODO: Create sync_guest_player function in spotify/util that puts to /play endpoint with hosts' current song uri 
+import Alert from "@material-ui/lab/Alert"; 
+
+//TODO: Create chatbox component 
+//TODO: create callback function for spotify player to prompt guest to activate their spotify app and to prompt with listen through the browser hint
+//TODO: make sure room is being deleted on leave 
+//TODO: add guest list to room model and update with guest entries  
 
 export default class Room extends Component { 
     constructor(props) { 
@@ -15,6 +19,7 @@ export default class Room extends Component {
             isHost: false,
             showSettings: false, 
             spotifyAuthenticated: false,
+            spotifyActive: false,
             accessToken: '',
             song: {}
         }; 
@@ -26,7 +31,6 @@ export default class Room extends Component {
         this.getRoomDetails = this.getRoomDetails.bind(this);
         this.authenticateSpotify = this.authenticateSpotify.bind(this); 
         this.getCurrentSong = this.getCurrentSong.bind(this);
-        // this.syncGuest = this.syncGuest.bind(this); 
         this.getRoomDetails();
     }
 
@@ -65,13 +69,7 @@ export default class Room extends Component {
     }
     componentDidMount() { 
         //Calls get current song every 1000 m.seconds (1 sec) while component is mounted
-        clearInterval(this.interval);
         this.interval = setInterval(this.getCurrentSong, 1000); 
-        // if (!this.state.isHost) { 
-        //     this.interval = setInterval(this.syncGuest, 10000); 
-        // } else { 
-        //     this.interval = setInterval(this.getCurrentSong, 1000); 
-        // }
     }
     // Stop calls when unmounting 
     componentWillUnmount() { 
@@ -81,17 +79,18 @@ export default class Room extends Component {
         fetch("/spotify/current-song/")
             .then((response) => {
                 if (response.status == 204) {
+                    this.setState({ spotifyActive: false }); 
                     return {}; //TODO: build placeholder for player for when nothing is returned
                 } else {
+                    this.setState({ spotifyActive: true });
                     return response.json();
                 }
             })
             .then((data) => {
                 this.setState({ song: data });  
-                console.log(this.state.song); 
-                // if (this.state.song.skip_votes === this.state.song.votes_needed) { 
-                //     this.skipSong(); 
-                // }
+                if (this.state.song.skip_votes === this.state.song.votes_needed) { 
+                    this.skipSong(); 
+                }
             }); 
         
         
@@ -164,36 +163,37 @@ export default class Room extends Component {
         ); 
     }
 
+    renderMusicPlayer() { 
+        {/* passing music player song object using the spread operator */}
+        return <MusicPlayer {...this.state.song} />; 
+    }
+
     render() { 
         let uri = this.state.song.uri; 
         const accessToken = this.state.accessToken
         if (this.state.showSettings) { 
             return this.renderSettings(); 
         }
-        // style={{visibility: "hidden"}}
         return (
             <Grid container spacing={1}>
-                <div >
-                    <SpotifyPlayer
+                <div style={{visibility: "hidden"}}>
+                    <SpotifyPlayer 
                         token={accessToken}
-                        // uris={[this.state.song.uri]}
-                        // play={this.state.song.is_playing ? true : false}
                         syncExternalDevice={true}
-                        // syncExternalDeviceInterval={20}
-                        // offset={this.state.song.progress}
                         name="test_player"
-                    />
-                    {/* <SpotifyPlayer><p>This is the spotify player.</p></SpotifyPlayer> */}
-                    
+                    />             
                 </div>
                 <Grid item xs={12} align="center">
                     <Typography variant="h6" component="h6">
                         Code: { this.roomCode}
                     </Typography>
                 </Grid>
-                <Grid item></Grid>
-                {/* passing music player song object using the spread operator */}
-                <MusicPlayer {...this.state.song}/>
+                <Grid item xs={12} align="center">
+                    {this.state.spotifyActive ? this.renderMusicPlayer() :
+                    (<Alert align="center" width={1} severity="warning" variant="outlined">Make sure the host's spotify app is active.</Alert>) }
+                </Grid>
+                 
+                
                 {/* show settings button if is host */}
                 {this.state.isHost ? this.renderSettingsButton() : null} 
                 <Grid item xs={12} align="center"> 
