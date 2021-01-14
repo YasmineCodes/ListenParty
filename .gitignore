@@ -12,3 +12,7 @@ db.sqlite3
 media
 .idea/
 .vs/
+
+#pythonanywhere
+.env
+
