@@ -10,12 +10,14 @@ from .models import Vote
 import json
 import os
 
-
+project_dir = os.path.dirname(os.path.dirname(
+    os.path.dirname(os.path.abspath(__file__))))
+print(project_dir)
 CURRENT_SONG = {}
 CLIENT_ID = os.getenv("CLIENT_ID")
+print(CLIENT_ID)
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
-REDIRECT_URI = os.path.join(
-    "listenparty.herokuapp.com", 'spotify', 'redirect')
+REDIRECT_URI = os.getenv("REDIRECT_URI")
 
 
 class AuthURL(APIView):
@@ -70,8 +72,6 @@ class IsSpotifyAuthenticated(APIView):
 
 class CurrentSong(APIView):
     print(REDIRECT_URI)
-    print(CLIENT_ID)
-    print(CLIENT_SECRET)
 
     def get(self, request, format=None):
         # get room code

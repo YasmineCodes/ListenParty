@@ -10,7 +10,8 @@ import os
 
 CLIENT_ID = os.getenv("CLIENT_ID")
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
-REDIRECT_URI = os.path.join("listenparty.herokuapp.com", 'spotify', 'redirect')
+REDIRECT_URI = os.path.join("http://127.0.0.1:8000/", 'spotify', 'redirect')
+
 BASE_URL = "https://api.spotify.com/v1/me/"
 
 
