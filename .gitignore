@@ -2,6 +2,7 @@ venv/
 credentials.py
 node_modules
 .module-cache
+.env 
 
 # Django #
 *.log
