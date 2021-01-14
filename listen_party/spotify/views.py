@@ -10,12 +10,9 @@ from .models import Vote
 import json
 import os
 
-project_dir = os.path.dirname(os.path.dirname(
-    os.path.dirname(os.path.abspath(__file__))))
-print(project_dir)
+
 CURRENT_SONG = {}
 CLIENT_ID = os.getenv("CLIENT_ID")
-print(CLIENT_ID)
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
 REDIRECT_URI = os.getenv("REDIRECT_URI")
 
@@ -71,8 +68,6 @@ class IsSpotifyAuthenticated(APIView):
 
 
 class CurrentSong(APIView):
-    print(REDIRECT_URI)
-
     def get(self, request, format=None):
         # get room code
         room_code = self.request.session.get('room_code')
@@ -183,11 +178,6 @@ class PlaySong(APIView):
         room = Room.objects.filter(code=room_code)[0]
         if self.request.session.session_key == room.host or room.guest_can_pause:
             play_song(room.host)
-            # payload = {'uris': [CURRENT_SONG.get('uri')],
-            #            'position_ms': CURRENT_SONG.get('progress')}
-            # sync_response = sync_guest_player(
-            #     self.request.session.session_key, data=json.dumps(payload))
-            # print(f"PlAY SYNC RESPONSE: {sync_response}")
             return Response({}, status=status.HTTP_204_NO_CONTENT)
         return Response({}, status=status.HTTP_403_FORBIDDEN)
 
@@ -206,11 +196,6 @@ class SkipSong(APIView):
             if self.request.session.session_key == room.host or len(votes)+1 >= votes_needed:
                 votes.delete()
                 skip_song(room.host)
-                # payload = {'uris': [CURRENT_SONG.get('uri')],
-                #            'position_ms': CURRENT_SONG.get('progress')}
-                # sync_response = sync_guest_player(
-                #     self.request.session.session_key, data=json.dumps(payload))
-                # print(f"SKIP SYNC RESPONSE: {sync_response}")
             else:
                 vote = Vote(user=self.request.session.session_key,
                             room=room, song_id=room.current_song)
