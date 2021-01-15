@@ -180,7 +180,7 @@ export default class Room extends Component {
                     <SpotifyPlayer
                         token={accessToken}
                         syncExternalDevice={true}
-                        name="test_player"
+                        name="Listen Party"
                     />
                 </div>
                 <Grid item xs={12} align="center">
