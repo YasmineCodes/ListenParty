@@ -176,7 +176,8 @@ export default class Room extends Component {
         }
         return (
             <Grid container spacing={1}>
-                <div style={{visibility: "hidden"}}>
+                {/* style={{visibility: "hidden"}} */}
+                <div >
                     <SpotifyPlayer
                         persistDeviceSelection={false}
                         token={accessToken}
