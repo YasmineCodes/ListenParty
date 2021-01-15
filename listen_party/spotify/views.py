@@ -1,5 +1,4 @@
 from django.shortcuts import redirect
-# from .ListenParty/credentials.py import REDIRECT_URI, CLIENT_ID, CLIENT_SECRET
 from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.response import Response
@@ -68,10 +67,6 @@ class IsSpotifyAuthenticated(APIView):
 
 
 class CurrentSong(APIView):
-    print(REDIRECT_URI)
-    print(CLIENT_ID)
-    print(CLIENT_SECRET)
-
     def get(self, request, format=None):
         # get room code
         room_code = self.request.session.get('room_code')
@@ -127,6 +122,8 @@ class CurrentSong(APIView):
                 self.request.session.session_key, payload)
             print(sync_response)
 
+        # Make sure listen party player is active
+        activate_listen_party_player(self.request.session.session_key)
         # return song object
         return Response(song, status=status.HTTP_200_OK)
 
@@ -182,11 +179,6 @@ class PlaySong(APIView):
         room = Room.objects.filter(code=room_code)[0]
         if self.request.session.session_key == room.host or room.guest_can_pause:
             play_song(room.host)
-            # payload = {'uris': [CURRENT_SONG.get('uri')],
-            #            'position_ms': CURRENT_SONG.get('progress')}
-            # sync_response = sync_guest_player(
-            #     self.request.session.session_key, data=json.dumps(payload))
-            # print(f"PlAY SYNC RESPONSE: {sync_response}")
             return Response({}, status=status.HTTP_204_NO_CONTENT)
         return Response({}, status=status.HTTP_403_FORBIDDEN)
 
@@ -205,11 +197,6 @@ class SkipSong(APIView):
             if self.request.session.session_key == room.host or len(votes)+1 >= votes_needed:
                 votes.delete()
                 skip_song(room.host)
-                # payload = {'uris': [CURRENT_SONG.get('uri')],
-                #            'position_ms': CURRENT_SONG.get('progress')}
-                # sync_response = sync_guest_player(
-                #     self.request.session.session_key, data=json.dumps(payload))
-                # print(f"SKIP SYNC RESPONSE: {sync_response}")
             else:
                 vote = Vote(user=self.request.session.session_key,
                             room=room, song_id=room.current_song)
