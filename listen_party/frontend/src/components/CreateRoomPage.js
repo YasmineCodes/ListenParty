@@ -182,7 +182,9 @@ export default class CreateRoomPage extends Component {
                             type="number"
                             defaultValue={this.state.votesToSkip}
                             onChange={this.handleSkipVotes}
-                            inputProps={{ min: 1, style:{textAlign: "center"} }} />
+                            inputProps={{ min: 1, style: { textAlign: "center" } }}
+                            
+                            />
                         <FormHelperText>
                             <div align="center">
                                 Votes Required to Skip Song
