@@ -31,6 +31,7 @@ export default class Room extends Component {
         this.getRoomDetails = this.getRoomDetails.bind(this);
         this.authenticateSpotify = this.authenticateSpotify.bind(this);
         this.getCurrentSong = this.getCurrentSong.bind(this);
+        this.updateAccessToken = this.updateAccessToken.bind(this); 
         this.getRoomDetails();
     }
 
@@ -67,6 +68,11 @@ export default class Room extends Component {
                 }
             });
     }
+
+    updateAccessToken(token) { 
+        this.setState({ accessToken: token }); 
+    }
+        
     componentDidMount() {
         //Calls get current song every 1000 m.seconds (1 sec) while component is mounted
         this.interval = setInterval(this.getCurrentSong, 1000);
@@ -169,16 +175,15 @@ export default class Room extends Component {
     }
 
     render() {
-        let uri = this.state.song.uri;
-        const accessToken = this.state.accessToken
         if (this.state.showSettings) {
             return this.renderSettings();
         }
+        console.log("rendering"); 
         return (
             <Grid container spacing={1}>
                 {/* style={{visibility: "hidden"}} */}
                 <div >
-                    <SpotifyPlayer/>
+                    <SpotifyPlayer accessToken={this.state.accessToken} callBack={this.updateAccessToken}/>
                 </div>
                 <Grid item xs={12} align="center">
                     <Typography variant="h6" component="h6">
