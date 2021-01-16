@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { Grid, Button, Typography } from "@material-ui/core";
 import CreateRoomPage from "./CreateRoomPage";
 import MusicPlayer from "./MusicPlayer";
-import SpotifyPlayer from "react-spotify-web-playback";
+import SpotifyPlayer from "./SpotifyPlayer"; 
 import Alert from "@material-ui/lab/Alert";
 
 //TODO: Create chatbox component
@@ -75,7 +75,7 @@ export default class Room extends Component {
     componentWillUnmount() {
         clearInterval(this.interval);
     }
-    getCurrentSong() {
+    async getCurrentSong() {
         fetch("/spotify/current-song/")
             .then((response) => {
                 if (response.status == 204) {
@@ -178,16 +178,11 @@ export default class Room extends Component {
             <Grid container spacing={1}>
                 {/* style={{visibility: "hidden"}} */}
                 <div >
-                    <SpotifyPlayer
-                        persistDeviceSelection={false}
-                        token={accessToken}
-                        syncExternalDevice={true}
-                        name="Listen Party"
-                    />
+                    <SpotifyPlayer/>
                 </div>
                 <Grid item xs={12} align="center">
                     <Typography variant="h6" component="h6">
-                        Code: { this.roomCode}
+                        Guests can join with code { this.roomCode}
                     </Typography>
                 </Grid>
                 <Grid item xs={12} align="center">
