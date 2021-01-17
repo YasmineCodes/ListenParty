@@ -7,6 +7,10 @@
   /* padding: 0 30px; */
 }
 
+#trackImage {
+  padding: 2px;
+  border-color: #ff8e53;
+}
 #txtbx {
   margin-bottom: 10px;
 }

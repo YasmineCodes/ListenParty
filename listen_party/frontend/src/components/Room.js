@@ -178,7 +178,6 @@ export default class Room extends Component {
         if (this.state.showSettings) {
             return this.renderSettings();
         }
-        console.log("rendering"); 
         return (
             <Grid container spacing={1}>
                 {/* style={{visibility: "hidden"}} */}
