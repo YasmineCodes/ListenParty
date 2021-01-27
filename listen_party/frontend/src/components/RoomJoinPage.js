@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import {
     Button,
     Grid,
+    FormControl,
     Typography,
     TextField,
 } from '@material-ui/core'; 
@@ -48,18 +49,22 @@ export default class RoomJoinPage extends Component{
                     <Typography variant="h4" component="h4"> Join a Room</Typography>
                 </Grid>
                 <Grid item xs={12} align="center">
-                    <TextField
-                        error={this.state.error}
-                        label="Code"
-                        placeholder="Enter a Room Code"
-                        value={this.state.roomCode}
-                        helperText={this.state.error}
-                        variant="outlined" 
-                        onChange={this.handleRoomEntryUpdate}
-                        />
+                    <FormControl margin="normal">
+                        <TextField
+                            error={this.state.error}
+                            label="Code"
+                            placeholder="Enter a Room Code"
+                            value={this.state.roomCode}
+                            helperText={this.state.error}
+                            variant="outlined" 
+                            onChange={this.handleRoomEntryUpdate}
+                            />
+                    </FormControl>
                 </Grid>
-                <Grid item xs={12} align="center">
-                    <Button variant="contained" color="primary" onClick={this.handleEnterRoom}>Enter Room
+                    <p style={{visibility: "hidden", margin: "0px", height: "0.5px"}}>-</p>
+                    
+                <Grid item xs={12} align="center" >
+                    <Button variant="contained" color="primary" onClick={this.handleEnterRoom} >Enter Room
                     </Button>
                 </Grid>
                 <Grid item xs={12} align="center">

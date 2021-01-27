@@ -2,10 +2,10 @@ import React, { Component } from "react";
 import { render } from "react-dom";
 import "./app.css"; 
 import HomePage from "./HomePage"
-import RoomJoinPage from "./RoomJoinPage"; 
-import CreateRoomPage from "./CreateRoomPage"; 
+import Footer from "./Footer"; 
 import { ThemeProvider } from "@material-ui/core/styles"; 
 import theme from "./theme"; 
+
 
 export default class App extends Component { 
     constructor(props) { 
@@ -19,6 +19,7 @@ export default class App extends Component {
                         <HomePage /> 
                     </div>
                 </div>
+                <Footer/>
             </ThemeProvider>
         ); 
     }

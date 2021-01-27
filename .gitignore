@@ -9,7 +9,11 @@ node_modules
 *.pot
 *.pyc
 __pycache__
-db.sqlite3
+# db.sqlite3
 media
 .idea/
 .vs/
+
+#pythonanywhere
+.env
+

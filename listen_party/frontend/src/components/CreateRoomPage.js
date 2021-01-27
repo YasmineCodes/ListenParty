@@ -134,6 +134,7 @@ export default class CreateRoomPage extends Component {
             {this.state.successMsg != "" ? (
               <Alert
                 severity="success"
+                variant="outlined"
                 onClose={() => {
                   this.setState({ successMsg: "" });
                 }}
@@ -143,6 +144,7 @@ export default class CreateRoomPage extends Component {
             ) : (
               <Alert
                 severity="error"
+                variant="outlined"
                 onClose={() => {
                   this.setState({ errorMsg: "" });
                 }}
@@ -182,7 +184,9 @@ export default class CreateRoomPage extends Component {
                             type="number"
                             defaultValue={this.state.votesToSkip}
                             onChange={this.handleSkipVotes}
-                            inputProps={{ min: 1, style:{textAlign: "center"} }} />
+                            inputProps={{ min: 1, style: { textAlign: "center" } }}
+                            
+                            />
                         <FormHelperText>
                             <div align="center">
                                 Votes Required to Skip Song

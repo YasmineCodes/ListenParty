@@ -1,4 +1,5 @@
 from requests.api import head
+from requests.sessions import session
 from rest_framework.response import Response
 from .models import SpotifyToken
 from django.utils import timezone
@@ -11,7 +12,6 @@ import os
 CLIENT_ID = os.getenv("CLIENT_ID")
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
 REDIRECT_URI = os.getenv("REDIRECT_URI")
-
 BASE_URL = "https://api.spotify.com/v1/me/"
 
 
@@ -49,29 +49,32 @@ def is_spotify_authenticated(session_key):
         expiry = tokens.expires_in
         if expiry <= timezone.now():
             print("TOKEN EXPIRED, REFRESHING...")
-            refresh_spotify_token(session_key)
-            print("TOKEN REFRESHED.")
+            refresh_response = refresh_spotify_token(session_key, tokens)
+            if refresh_response == 'error':
+                return {'is_authenticated': False, 'access_token': ''}
+            else:
+                print("TOKEN REFRESHED.")
         access_token = tokens.access_token
         return {'is_authenticated': True, 'access_token': access_token}
     return {'is_authenticated': False, 'access_token': ''}
 
 
-def refresh_spotify_token(session_key):
-    refresh_token = get_user_tokens(session_key).refresh_token
+def refresh_spotify_token(session_key, tokens):
+    refresh_token = tokens.refresh_token
     response = post('https://accounts.spotify.com/api/token', data={
         'grant_type': 'refresh_token',
         'refresh_token': refresh_token,
         'client_id': CLIENT_ID,
         'client_secret': CLIENT_SECRET,
     }).json()
-
-    access_token = response.get('access_token')
-    token_type = response.get('token_type')
-    expires_in = response.get('expires_in')
-    # refresh_token = response.get('refresh_token')
-
-    update_or_create_user_tokens(
-        session_key, access_token, token_type, expires_in, refresh_token)
+    if 'error' in response:
+        return 'error'
+    else:
+        access_token = response.get('access_token')
+        token_type = response.get('token_type')
+        expires_in = response.get('expires_in')
+        update_or_create_user_tokens(
+            session_key, access_token, token_type, expires_in, refresh_token)
 
 
 def execute_spotify_api_request(host, endpoint, post_=False, put_=False, data={}):
@@ -121,11 +124,20 @@ def skip_song(session_key):
     return execute_spotify_api_request(session_key, 'player/next', post_=True)
 
 
-def activate_spotify_device(host, device):
-    print('ACTIVATING DEVICE')
-    headers = {'Content-Type': 'application/json',
-               'Authorization': 'Bearer ' + host.access_token,
-               }
-    response = put('https://api.spotify.com/v1/me/player', headers=headers, data={'device_ids': [device], 'play': True}
-                   ).json()
-    print(response)
+def activate_listen_party_player(session_key):
+    devices_endpoint = 'player/devices'
+    transfer_endpoint = 'player'
+    # Get list of available devices for user
+    response = execute_spotify_api_request(session_key, devices_endpoint)
+    # Find Listen Party Player in returned list
+    listen_party_player = [
+        device for device in response.get('devices') if device.get('name') == "Listen Party"]
+    # Transfer playback to list_party player if it is found and is not already active
+    if listen_party_player and not listen_party_player[0].get('is_active'):
+        print('ACTIVATING LISTEN PARTY PLAYER...')
+        data = {'device_ids': [listen_party_player[0].get('id')]}
+        response = execute_spotify_api_request(
+            session_key, transfer_endpoint, put_=True, data=json.dumps(data))
+        print(response)
+    elif not listen_party_player:
+        print(f"LISTEN PARTY PLAYER NOT FOUND")

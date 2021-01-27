@@ -1,5 +1,4 @@
 from django.shortcuts import redirect
-# from .ListenParty/credentials.py import REDIRECT_URI, CLIENT_ID, CLIENT_SECRET
 from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.response import Response
@@ -19,7 +18,7 @@ REDIRECT_URI = os.getenv("REDIRECT_URI")
 
 class AuthURL(APIView):
     def get(self, request, fornat=None):
-        scopes = 'streaming user-read-email user-read-private user-read-playback-state user-modify-playback-state user-read-currently-playing'
+        scopes = 'streaming app-remote-control user-read-email user-read-private user-read-playback-state user-modify-playback-state user-read-currently-playing'
 
         url = Request('GET', 'https://accounts.spotify.com/authorize', params={
             'scope': scopes,
@@ -56,6 +55,17 @@ def spotify_callback(request, format=None):
         request.session.session_key, access_token, token_type, expires_in, refresh_token)
 
     return redirect('frontend:home')
+
+
+class RefreshToken(APIView):
+    def get(self, request, format=None):
+        session_key = self.request.session.session_key
+        tokens = get_user_tokens(session_key)
+        refresh = refresh_spotify_token(session_key, tokens)
+        if refresh == 'error':
+            return Response({}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({'access_token': tokens.access_token}, status=status.HTTP_200_OK)
 
 
 class IsSpotifyAuthenticated(APIView):
@@ -123,6 +133,8 @@ class CurrentSong(APIView):
                 self.request.session.session_key, payload)
             print(sync_response)
 
+        # Make sure listen party player is active
+        activate_listen_party_player(self.request.session.session_key)
         # return song object
         return Response(song, status=status.HTTP_200_OK)
 

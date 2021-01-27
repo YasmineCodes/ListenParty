@@ -4,7 +4,7 @@ const webpack = require("webpack");
 module.exports = {
   entry: "./src/index.js",
   output: {
-    path: path.resolve(__dirname, "listen_party/static"), // Should be in STATICFILES_DIRS
+    path: path.resolve(__dirname, "static/frontend"), // Should be in STATICFILES_DIRS
     publicPath: "/static/", // Should match Django STATIC_URL
     filename: "[name].js", // No filename hashing, Django takes care of this
     chunkFilename: "[id]-[chunkhash].js", // DO have Webpack hash chunk filename, see below

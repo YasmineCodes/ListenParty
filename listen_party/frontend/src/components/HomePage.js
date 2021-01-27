@@ -6,6 +6,7 @@ import {
     Button,
     ButtonGroup,
     Grid,
+    Hidden,
     Typography,
 } from '@material-ui/core'; 
 import {
@@ -36,8 +37,11 @@ export default class HomePage extends Component {
         return (
             <Grid container spacing={3}>
                 <Grid item xs={12} align="center">
-                    <Typography variant="h3" component="h3">
-                        Dance Party
+                    <Typography variant="h4" component="h3" style={{fontStyle:"italic", fontWeight:"bold"}}>
+                        Listen Party
+                    </Typography>
+                    <Typography variant="substitle1" style={{fontStyle:"italic"}} gutterBottom>
+                        <Hidden only="xs"> Jam, dance, learn, or laugh with friends. </Hidden> Use your Spotify premium account to listen to your favorite music and podcasts together with listen party.
                     </Typography>
                 </Grid>
                 <Grid item xs={12} align="center">
